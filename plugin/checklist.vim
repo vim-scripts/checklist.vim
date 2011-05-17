@@ -14,34 +14,41 @@
 " Put checklist.vim into your plugin directory and restart vim.
 
 if exists("manage_checklist")
-    finish
+      finish
 endif
 let manage_checklist = 1
- 
+
 function! s:makeItem()
-  put='[ ] '
+  put='[_] '
+endfunction
+
+function! s:makeSubItem()
+  put='  [_] '
 endfunction
 
 function! s:checkItem()
   let current_line = getline('.')
-  if match(current_line,'\[\s\]')
-    exe "s/\[x\]/ /i"
-    exe "s/ - [0-9]*\:[0-9]* [A|P]M//i"
+  if match(current_line,"[_]") >= 0
+    let time = strftime("%I:%M %p")
+    exe "s/\[_\]/x/i"
+    exe "normal A - ".time
     echo "Item checked."
   else
-    if match(current_line,'\[x\]')
-      let time = strftime("%I:%M %p")
-      exe "s/\[ \]/x/i"
-      exe "normal A - ".time
+    if match(current_line,'[x]') >= 0
+      exe "s/\[x\]/_/i"
+      exe "s/ - [0-9]*\:[0-9]* [A|P]M//i"
       echo "Item unchecked."
     endif
   endif
 endfunction
 
-command MakeItem :call <SID>makeItem()
-command CheckItem :call <SID>checkItem()
+command MakeItem    :call    <SID>makeItem()
+command MakeSubItem :call    <SID>makeSubItem()
+command CheckItem   :call    <SID>checkItem()
 
-nmap <leader>z :MakeItem<CR>i<End>
-imap <leader>z <Esc>:MakeItem<CR>i<End>
-nmap <leader>zz :CheckItem<CR>
-imap <leader>zz <Esc>:CheckItem<CR>
+nmap <leader>z  :MakeItem        <CR>i<End>
+nmap <leader>zs :MakeSubItem     <CR>i<End>
+nmap <leader>zz :CheckItem       <CR><End>
+imap <leader>z  <Esc>:MakeItem   <CR>i<End>
+imap <leader>zs <Esc>:MakeSubItem<CR>i<End>
+imap <leader>zz <Esc>:CheckItem  <CR><End>
