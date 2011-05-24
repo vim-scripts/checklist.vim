@@ -1,72 +1,59 @@
 " checklist.vim - v0.3
 " Vim script for managing a checklist.
-" Last Modified: Thu 05/19/2011 11:07 PM
+" Last Modified: Tue 05/24/2011 03:09 PM
 " Maintainer: Chris Truett <http://www.theywillknow.us>
 " 
 " Description:
 " Checklist.vim is a super-simple way to manage .txt todo lists.
-" 
-" Example:
-" [x] Finish writing date stamp support for checklist.vim - 09:47 PM
-" [ ] Post checklist.vim on vim.org
-" 
-" Installation:
-" Put checklist.vim into your plugin directory and restart vim.
+"
+" Update:
+" Rewrote the plugin from the ground up; now uses <leader>v and <leader>V to manage all changes to the checklist items. Timestamps are default.
 
 " Only load plugin once
 if exists("manage_checklist")
   finish
 endif
+
 let manage_checklist = 1
+let g:checklist_use_timestamps = 1
 
-" Make initial list item
-function s:makeItem(type)
-  let type = a:type
-  echo type
-  if type == 'sub'
-    put='  [_] '
-  endif
-  if type == 'normal'
-    put='[_] '
-  endif
-endfunction
-
-" Toggle checkmark and timestamp
-function! s:checkItem (stamp)
+function! MakeItem (type)
   let current_line = getline('.')
-  if match(current_line,"[_]") >= 0
-    let time = strftime("%I:%M %p")
-    exe "s/\[_\]/x/i"
-    if a:stamp == "stamped"
-      exe "normal A - ".time
-    endif
+  if match(current_line,'\[_]') >= 0
+    " If item is unchecked, check it and add timestamp
     echo "Item checked."
+    exe 's/\[_]/[x]/'
+    let time = strftime("%I:%M %p")
+    if g:checklist_use_timestamps == 1
+      exe "normal 0f]a ".time.":"
+    endif
+    return ""
+  elseif match(current_line,'\[x]') >= 0
+    " If line is already checked, uncheck it and remove timestamp
+    echo "Item unchecked."
+    if g:checklist_use_timestamps == 1
+      exe 's/\[x] [0-9]*:[0-9]* [A|P]M:/[_]/i'
+    elseif g:checklist_use_timestamps == 0
+      exe 's/\[x]/[_]/i'
+    endif
+    return ""
   else
-    let datestring = ' - [0-9]*\:[0-9]* [A|P]M'
-    if match(current_line,'[x]') >= 0
-      exe "s/\[x\]/_/i"
-      if match(current_line, datestring) >= 0
-        exe "s/ - [0-9]*\:[0-9]* [A|P]M//i"
-      endif
-      echo "Item unchecked."
+    " If line is empty, add a new item.
+    " Check if this is a top-level or a sub-item
+    if a:type == 'top'
+      " If top level, place '[_] '
+      exe "normal i[_] "
+      return ""
+    elseif a:type == 'sub'
+      " If sub level, place '[_] ' and indent
+      exe "normal i[_] "
+      return ""
     endif
   endif
 endfunction
 
-" Make Commands
-command MakeItem         :call <SID>makeItem('normal')
-command MakeSubItem      :call <SID>makeItem("sub")
-command CheckItem        :call <SID>checkItem("")
-command CheckItemStamped :call <SID>checkItem("stamped")
+nmap <leader>v  :call MakeItem('top')<CR>i<End>
+nmap <leader>V  :call MakeItem('sub')<CR>V>i<End>
 
-" Normal mode mapping
-nmap <leader>z  :MakeItem        <CR>i<End>
-nmap <leader>zs :MakeSubItem     <CR>i<End>
-nmap <leader>zz :CheckItem       <CR><End>
-nmap <leader>zt :CheckItemStamped       <CR><End>
-
-" Insert mode mapping
-imap <leader>z  <Esc>:MakeItem   <CR>i<End>
-imap <leader>zs <Esc>:MakeSubItem<CR>i<End>
-imap <leader>zz <Esc>:CheckItem  <CR><End>
-imap <leader>zt <Esc>:CheckItemStamped  <CR><End>
+imap <leader>v  <C-R>=MakeItem('top')<CR><End>
+imap <leader>V  <C-R>=MakeItem('sub')<CR><Esc>V>i<End>
