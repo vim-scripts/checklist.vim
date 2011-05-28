@@ -1,13 +1,8 @@
-" checklist.vim - v0.3
-" Vim script for managing a checklist.
-" Last Modified: Tue 05/24/2011 03:09 PM
+" Title: checklist.vim - v0.5
+" Summary: Vim script for creating a checklist.
+" Last Modified: Sat 05/28/2011 05:51 AM
 " Maintainer: Chris Truett <http://www.theywillknow.us>
-" 
-" Description:
-" Checklist.vim is a super-simple way to manage .txt todo lists.
-"
-" Update:
-" Rewrote the plugin from the ground up; now uses <leader>v and <leader>V to manage all changes to the checklist items. Timestamps are default.
+" Description: Checklist.vim is a super-simple way to create todo lists.
 
 " Only load plugin once
 if exists("manage_checklist")
@@ -17,43 +12,80 @@ endif
 let manage_checklist = 1
 let g:checklist_use_timestamps = 1
 
-function! MakeItem (type)
-  let current_line = getline('.')
-  if match(current_line,'\[_]') >= 0
-    " If item is unchecked, check it and add timestamp
-    echo "Item checked."
-    exe 's/\[_]/[x]/'
-    let time = strftime("%I:%M %p")
-    if g:checklist_use_timestamps == 1
-      exe "normal 0f]a ".time.":"
+function! MakeItem ()
+  " Define variables
+  let l:line = getline(line(".") - 1)
+  
+  " Check what the previous line contains
+  function! CheckPrevLine ()
+    let l:line = getline(line(".") - 1)
+    if match(l:line, '^\s*$') >= 0
+      return "Empty"
+    else
+      return "Not Empty"
     endif
-    return ""
-  elseif match(current_line,'\[x]') >= 0
-    " If line is already checked, uncheck it and remove timestamp
-    echo "Item unchecked."
-    if g:checklist_use_timestamps == 1
-      exe 's/\[x] [0-9]*:[0-9]* [A|P]M:/[_]/i'
-    elseif g:checklist_use_timestamps == 0
-      exe 's/\[x]/[_]/i'
-    endif
-    return ""
+  endfunction
+
+  " Add checkboxes or parent items
+  if CheckPrevLine() == 'Empty'
+    exe 'normal ddo+ '
+    return ''
+  elseif match(l:line, '\V+ ') >= 0
+    exe 'normal i '
+    exe 'normal v>'
+    return ''
+  elseif match(l:line, '\V ') >= 0
+    exe 'normal i '
+    return ''
+  elseif match(l:line, '\V× ') >= 0
+    exe 'normal i '
+    return ''
   else
-    " If line is empty, add a new item.
-    " Check if this is a top-level or a sub-item
-    if a:type == 'top'
-      " If top level, place '[_] '
-      exe "normal i[_] "
-      return ""
-    elseif a:type == 'sub'
-      " If sub level, place '[_] ' and indent
-      exe "normal i[_] "
-      return ""
-    endif
+    return ''
   endif
 endfunction
 
-nmap <leader>v  :call MakeItem('top')<CR>i<End>
-nmap <leader>V  :call MakeItem('sub')<CR>V>i<End>
+function! ToggleItem ()
+  " Define variables
+  let current_line = getline('.')
+  let l:line = getline(line(".") - 1)
 
-imap <leader>v  <C-R>=MakeItem('top')<CR><End>
-imap <leader>V  <C-R>=MakeItem('sub')<CR><Esc>V>i<End>
+  " Toggle checkboxes and timestamps
+  if match(current_line,'\V ') >= 0
+    echo "Item checked."
+    exe 's/\V /× /'
+    let time = strftime("%I:%M %p")
+    if g:checklist_use_timestamps == 1
+      exe "normal a ".time." :"
+    endif
+    return ""
+  elseif match(current_line,'\V× ') >= 0
+    echo "Item unchecked."
+    if g:checklist_use_timestamps == 1
+      exe 's/\× \d\{2}:\d\{2} [A|P]M ://i'
+    elseif g:checklist_use_timestamps == 0
+      exe 's/\V× / /i'
+    endif
+    return ""
+  endif
+
+  " Toggle Folds
+  if match(current_line,'^+ ') >= 0
+    exe 'normal jzc'
+    exe 'normal k'
+    exe 's/\V+ /- /i'
+    return ""
+  elseif match(current_line,'^- ') >= 0
+    exe 'normal jzo'
+    exe 'normal k'
+    exe 's/\V- /+ /i'
+    return ""
+  endif
+endfunction
+
+" Checkbox
+imap <leader>v  <C-R>=MakeItem()<CR><End>
+nmap <leader>v  :call MakeItem()<CR>i<End>
+
+" Toggle
+nmap <leader>vv :call ToggleItem()<CR><End>
