@@ -15,14 +15,14 @@ endif
 setlocal foldmethod=indent
 
 " Keep these disabled for now
-" exe 'normal zR'
-" exe 'g!//s/- /+ /g'
+exe 'normal zR'
+exe 'g!//s/- /+ /g'
 
 " Matches
-syn match checkBox /\V / skipwhite
-syn match checkedBox /\v× .*/ skipwhite
-syn match plus /\V+ / skipwhite
-syn match minus /\V- / skipwhite
+syn match checkBox /^   / skipwhite
+syn match checkedBox /^  × .*/ skipwhite
+syn match plus /^+ / skipwhite
+syn match minus /^- / skipwhite
 
 hi link checkBox Type
 hi link checkedBox Comment
