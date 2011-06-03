@@ -12,15 +12,15 @@ if !exists("main_syntax")
   let main_syntax = 'chklst'
 endif
 
+" Keep these disabled for now
 setlocal foldmethod=indent
 
-" Keep these disabled for now
 exe 'normal zR'
 exe 'g!//s/- /+ /g'
 
 " Matches
-syn match checkBox /^   / skipwhite
-syn match checkedBox /^  × .*/ skipwhite
+syn match checkBox /^\s*\* / skipwhite
+syn match checkedBox /^\s*× .*/ skipwhite
 syn match plus /^+ / skipwhite
 syn match minus /^- / skipwhite
 
