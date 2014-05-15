@@ -9,9 +9,7 @@ if exists("manage_checklist")
   "finish
 endif
 
-if g:checklist_use_timestamps == 0
-  let g:checklist_use_timestamps = 0
-else
+if !exists("g:checklist_use_timestamps") || g:checklist_use_timestamps != 0
   let g:checklist_use_timestamps = 1
 endif
 
@@ -67,7 +65,7 @@ function! ToggleItem ()
   elseif match(current_line,'\V× ') >= 0
     echo "Item unchecked."
     if g:checklist_use_timestamps == 1
-      exe 's/\× \d\{2}\.\d\{2}\.\d\{4} at \d\{2}:\d\{2} [A|P]M :/*/i'
+      exe 's/× \d\{2}\.\d\{2}\.\d\{4} at \d\{2}:\d\{2} [A|P]M :/*/i'
     elseif g:checklist_use_timestamps == 0
       exe 's/\V× /* /i'
     endif
