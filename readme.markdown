@@ -1,11 +1,8 @@
 #### Installation
 
-Extract checklist.zip to your .vim folder, or manually put chklst.vim into /syntax and checklist.vim into /plugin.
-
-Add the following lines to your .vimrc:
-
-    " Checklist
-    au BufNewFile,BufRead *.chklst setf chklst
+Extract checklist.zip to your .vim folder,
+manually put the files into their respective folders,
+or maybe use a bundle manager like pathogen.vim, Vundle or NeoBundle.
 
 #### Usage
 
@@ -20,6 +17,7 @@ To dis­able timestamps, add this to your .vimrc:
     :let g:checklist_use_timestamps = 0
 
 #### Updates
+    17.10.2014 - automated filetype detection
     03.06.2011 - Changed the ascii box <81> to an asterick. (Didn't really want to though!)
     01.06.2011 - Added datestamp support. 
     05.28.2011 — Major Rehaul. Much faster. Added syntax file and packaged into .zip.
