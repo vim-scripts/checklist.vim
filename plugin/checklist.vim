@@ -9,9 +9,7 @@ if exists("manage_checklist")
   "finish
 endif
 
-if g:checklist_use_timestamps == 0
-  let g:checklist_use_timestamps = 0
-else
+if !exists("g:checklist_use_timestamps")
   let g:checklist_use_timestamps = 1
 endif
 
